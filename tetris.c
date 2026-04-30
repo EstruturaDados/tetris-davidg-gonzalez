@@ -107,7 +107,7 @@ Peca gerarPeca() {
 
 // ================= MOSTRAR =================
 void mostrarFila(Fila *f) {
-    printf("\nFila de Pecas: ");
+    printf("\nFila de Peças: ");
 
     int idx = f->inicio;
 
@@ -134,6 +134,8 @@ int main() {
     // 🧩 Nível Novato: Fila de Peças Futuras
     // (já implementado)
 
+    // 🧠 Nível Aventureiro: (já implementado)
+
     Fila fila;
     Pilha pilha;
     int opcao;
@@ -147,53 +149,106 @@ int main() {
     }
 
     do {
+        printf("\n=== Estado Atual ===\n");
         mostrarFila(&fila);
         mostrarPilha(&pilha);
 
-        printf("\n1 - Jogar Peça\n");
-        printf("2 - Reservar Peça\n");
-        printf("3 - Usar Peça Reservada\n");
+        printf("\nOpções:\n");
+        printf("1 - Jogar peça da frente da fila\n");
+        printf("2 - Enviar peça da fila para reserva (pilha)\n");
+        printf("3 - Usar peça da reserva (pilha)\n");
+        printf("4 - Trocar peça da frente da fila com o topo da pilha\n");
+        printf("5 - Trocar os 3 primeiros da fila com as 3 peças da pilha\n");
         printf("0 - Sair\n");
-        printf("Escolha: ");
+        printf("Opção: ");
         scanf("%d", &opcao);
 
         switch (opcao) {
 
-            case 1: { // Jogar peça
+            case 1: {
                 Peca removida = dequeue(&fila);
-
                 if (removida.id != -1) {
-                    printf("Voce jogou [%c %d]\n", removida.tipo, removida.id);
-                    enqueue(&fila, gerarPeca()); // mantém cheia
+                    printf("Você jogou [%c %d]\n", removida.tipo, removida.id);
+                    enqueue(&fila, gerarPeca());
                 }
                 break;
             }
 
-            case 2: { // Reservar peça
+            case 2: {
                 if (pilhaCheia(&pilha)) {
                     printf("Pilha cheia!\n");
                     break;
                 }
 
                 Peca removida = dequeue(&fila);
-
                 if (removida.id != -1) {
                     push(&pilha, removida);
-                    printf("Peca [%c %d] enviada para reserva\n", removida.tipo, removida.id);
+                    printf("Peça [%c %d] enviada para reserva\n", removida.tipo, removida.id);
                     enqueue(&fila, gerarPeca());
                 }
                 break;
             }
 
-            case 3: { // Usar peça reservada
+            case 3: {
                 Peca usada = pop(&pilha);
-
                 if (usada.id != -1) {
-                    printf("Voce usou [%c %d] da reserva\n", usada.tipo, usada.id);
+                    printf("Você usou [%c %d] da reserva\n", usada.tipo, usada.id);
                     enqueue(&fila, gerarPeca());
                 } else {
                     printf("Pilha vazia!\n");
                 }
+                break;
+            }
+
+            case 4: {
+                if (filaVazia(&fila) || pilhaVazia(&pilha)) {
+                    printf("Não é possível realizar a troca!\n");
+                    break;
+                }
+            
+                int idx = fila.inicio;
+            
+                Peca temp = fila.itens[idx];
+                fila.itens[idx] = pilha.itens[pilha.topo];
+                pilha.itens[pilha.topo] = temp;
+            
+                printf("Troca realizada entre a frente da fila e o topo da pilha.\n");
+                break;
+            }
+
+            case 5: {
+                if (fila.tamanho < 3 || pilha.topo < 2) {
+                    printf("Não há peças suficientes para troca!\n");
+                    break;
+                }
+            
+                Peca tempFila[3];
+                Peca tempPilha[3];
+            
+                for (int i = 0; i < 3; i++) {
+                    int idx = (fila.inicio + i) % TAM;
+                    tempFila[i] = fila.itens[idx];
+                }
+            
+                for (int i = 0; i < 3; i++) {
+                    tempPilha[i] = pilha.itens[pilha.topo - i];
+                }
+            
+                for (int i = 0; i < 3; i++) {
+                    int idx = (fila.inicio + i) % TAM;
+                    fila.itens[idx] = tempPilha[i];
+                }
+            
+                for (int i = 0; i < 3; i++) {
+                    pilha.itens[pilha.topo - i] = tempFila[2 - i];
+                }
+            
+                printf("Troca realizada entre os 3 primeiros da fila e os 3 da pilha.\n");
+            
+                printf("\n=== Novo Estado ===\n");
+                mostrarFila(&fila);
+                mostrarPilha(&pilha);
+            
                 break;
             }
 
@@ -202,12 +257,10 @@ int main() {
                 break;
 
             default:
-                printf("Opcao invalida!\n");
+                printf("Opção inválida!\n");
         }
 
     } while (opcao != 0);
-
-    // 🔄 Nível Mestre: (não implementado)
 
     return 0;
 }
